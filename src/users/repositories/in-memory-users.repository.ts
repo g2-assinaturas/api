@@ -1,10 +1,12 @@
 // Implementação em memória só para eu conseguir desenvolver sem banco real
 import { UsersRepository } from './users.repository';
 import { RegisterDto } from '../../auth/dto/register.dto';
+import { Injectable } from '@nestjs/common';
 
 let usersStore: any[] = [];
 
-export class InMemoryUsersRepository implements UsersRepository {
+@Injectable()
+export class InMemoryUsersRepository extends UsersRepository {
   async findByEmailOrCpf(emailOrCpf: string): Promise<any | null> {
     // Aqui eu vou buscar pelo primeiro usuário que tenha email ou cpf igual ao valor informado
     return (

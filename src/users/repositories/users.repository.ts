@@ -1,7 +1,7 @@
-// Interface que eu vou usar como contrato para acesso a dados de usuário
+// Contrato que eu vou usar para acesso a dados de usuário
 import { RegisterDto } from '../../auth/dto/register.dto';
 
-export interface UsersRepository {
-  findByEmailOrCpf(emailOrCpf: string): Promise<any | null>;
-  createUserWithCompanyAndAddress(data: RegisterDto): Promise<any>;
+export abstract class UsersRepository {
+  abstract findByEmailOrCpf(emailOrCpf: string): Promise<any | null>;
+  abstract createUserWithCompanyAndAddress(data: RegisterDto): Promise<any>;
 }

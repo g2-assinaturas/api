@@ -2,13 +2,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { InMemoryUsersRepository } from '../users/repositories/in-memory-users.repository';
+import { UsersRepository } from '../users/repositories/users.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly usersRepository: InMemoryUsersRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async register(data: RegisterDto) {
