@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { SubscriptionsController } from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
 import { PlansModule } from '../plans/plans.module';
-import { InMemorySubscriptionsRepository } from './repositories/in-memory-subscriptions.repository';
+import { PrismaSubscriptionsRepository } from './repositories/prisma-subscriptions.repository';
+import { PaymentsModule } from '../payments/payments.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [PlansModule],
+  imports: [PlansModule, PaymentsModule, UsersModule],
   controllers: [SubscriptionsController],
-  providers: [SubscriptionsService, InMemorySubscriptionsRepository],
+  providers: [SubscriptionsService, PrismaSubscriptionsRepository],
 })
 export class SubscriptionsModule {}

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UsersRepository } from '../users/repositories/users.repository';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -12,28 +13,33 @@ export class AuthService {
   ) {}
 
   async register(data: RegisterDto) {
-    // Aqui eu vou usar o repositório para simular a criação de usuário, empresa e endereço
+    // Aqui eu crio usuário, empresa e endereço de verdade usando Prisma
     const result = await this.usersRepository.createUserWithCompanyAndAddress(
       data,
     );
 
     return {
-      message: 'Registro criado em memória (depois eu troco para Prisma/banco real)',
+      message: 'Registro criado com sucesso no banco de dados',
       result,
     };
   }
 
   async login(data: LoginDto) {
-    // Aqui eu vou tentar achar o usuário em memória (depois eu troco para Prisma)
+    // Aqui eu vou tentar achar o usuário no banco pelo email ou cpf
     const user = await this.usersRepository.findByEmailOrCpf(data.emailOrCpf);
 
     if (!user) {
-      throw new UnauthorizedException('Usuário não encontrado (modo demo)');
+      throw new UnauthorizedException('Usuário não encontrado');
     }
 
-    // Como ainda não estou salvando senha, vou deixar a senha fixa em "password" só para fluxo de teste
-    if (data.password !== 'password') {
-      throw new UnauthorizedException('Senha inválida (modo demo)');
+    // TODO: quando eu tiver hash de senha, eu valido aqui com bcrypt
+    const isPasswordValid = await bcrypt.compare(
+      data.password,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Senha inválida');
     }
 
     const payload = { sub: user.id, email: user.email };

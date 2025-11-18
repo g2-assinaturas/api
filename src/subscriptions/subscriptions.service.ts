@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PlansService } from '../plans/plans.service';
-import { InMemorySubscriptionsRepository } from './repositories/in-memory-subscriptions.repository';
+import { PrismaSubscriptionsRepository } from './repositories/prisma-subscriptions.repository';
 import {
   CancelSubscriptionDto,
   CheckoutSubscriptionDto,
 } from './dto/subscription.dto';
+import { StripeService } from '../payments/stripe/stripe.service';
+import { UsersRepository } from '../users/repositories/users.repository';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private readonly plansService: PlansService,
-    private readonly subscriptionsRepository: InMemorySubscriptionsRepository,
+    private readonly subscriptionsRepository: PrismaSubscriptionsRepository,
+    private readonly stripeService: StripeService,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   listPlans() {
@@ -18,16 +22,34 @@ export class SubscriptionsService {
     return this.plansService.findAll();
   }
 
-  checkout(userId: string, data: CheckoutSubscriptionDto) {
-    // Primeiro eu preciso garantir que o plano existe
-    const plans = this.plansService.findAll();
+  async checkout(userId: string, data: CheckoutSubscriptionDto) {
+    const plans = await this.plansService.findAll();
     const plan = plans.find((p) => p.id === data.planId);
 
     if (!plan) {
       throw new NotFoundException('Plano não encontrado');
     }
 
-    // Aqui eu delego para o repositório em memória criar a assinatura
+    // Eu preciso garantir que o plano tem um priceId do Stripe configurado
+    // (isso vem da criação do produto/preço no painel do Stripe ou via script separado)
+    const stripePriceId = (plan as any).stripePriceId ?? null;
+    if (!stripePriceId) {
+      throw new NotFoundException('Plano não está configurado com stripePriceId');
+    }
+
+    // Agora eu busco o usuário para ter dados de nome/email para o customer do Stripe
+    const user = await this.usersRepository.findByEmailOrCpf(userId);
+
+
+    const customerId = undefined as unknown as string;
+
+    const { subscriptionId } = await this.stripeService.createSubscription({
+      customerId,
+      priceId: stripePriceId,
+    });
+
+    // Aqui eu delego para o repositório baseado em Prisma criar a assinatura
+    // e eu posso estender depois o método createSubscription para também salvar stripeSubscriptionId
     return this.subscriptionsRepository.createSubscription(userId, plan);
   }
 

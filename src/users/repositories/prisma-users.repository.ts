@@ -1,8 +1,9 @@
-// Implementação de UsersRepository usando Prisma (quando o banco estiver disponível)
+// Implementação de UsersRepository usando Prisma
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/module/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
 import { RegisterDto } from '../../auth/dto/register.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
@@ -20,13 +21,14 @@ export class PrismaUsersRepository implements UsersRepository {
   async createUserWithCompanyAndAddress(data: RegisterDto): Promise<any> {
     // Aqui eu crio usuário, empresa, endereço e relação entre eles em uma única transação
     const result = await this.prisma.$transaction(async (tx) => {
+      const passwordHash = await bcrypt.hash(data.user.password, 10);
+
       const user = await tx.user.create({
         data: {
           name: data.user.name,
           email: data.user.email,
           cpf: data.user.cpf,
-          // TODO: aqui eu ainda vou fazer hash da senha antes de salvar
-          password: data.user.password,
+          password: passwordHash,
         },
       });
 
