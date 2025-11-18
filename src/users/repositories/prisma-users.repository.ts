@@ -1,6 +1,6 @@
 // Implementação de UsersRepository usando Prisma (quando o banco estiver disponível)
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from 'src/module/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
 import { RegisterDto } from '../../auth/dto/register.dto';
 
@@ -48,7 +48,6 @@ export class PrismaUsersRepository implements UsersRepository {
           city: data.address.city,
           state: data.address.state,
           zipCode: data.address.zipCode,
-          ibgeCode: data.address.ibgeCode,
           complement: data.address.complement,
           companyId: company.id,
         },
