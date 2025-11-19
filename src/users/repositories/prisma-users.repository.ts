@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/module/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
 import { RegisterDto } from '../../auth/dto/register.dto';
+import { Prisma } from 'generated/prisma/client';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
@@ -19,7 +20,7 @@ export class PrismaUsersRepository implements UsersRepository {
 
   async createUserWithCompanyAndAddress(data: RegisterDto): Promise<any> {
     // Aqui eu crio usuário, empresa, endereço e relação entre eles em uma única transação
-    const result = await this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.create({
         data: {
           name: data.user.name,
