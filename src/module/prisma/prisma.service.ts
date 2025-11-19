@@ -16,11 +16,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    await this.$connect();
-    console.log('Conectado ao banco de dados!')
+    try {
+      await this.$connect();
+      console.log('Conectado ao banco de dados!');
+    } catch (error) {
+      console.warn('Aviso: Não foi possível conectar ao banco durante a inicialização:', error.message);
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    try {
+      await this.$disconnect();
+    } catch (error) {
+      console.warn('Erro ao desconectar do banco:', error.message);
+    }
   }
 }
