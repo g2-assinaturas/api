@@ -6,150 +6,181 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id              String          @id @default(cuid())
-  email           String          @unique
-  cpf             String          @unique
-  name            String
-  password        String
-  emailVerified   Boolean         @default(false)
-  globalRole      GlobalRole      @default(USER)
-  
-  companyUsers    CompanyUser[]
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+model SuperAdmin {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      AdminRole @default(SUPER_ADMIN)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  @@map("users")
+  @@map("super_admins")
 }
 
 model Company {
-  id              String          @id @default(cuid())
-  name            String
-  email           String
-  phone           String
-  cnpj            String?         @unique
-  description     String?
-  
-  address         Address?
-  companyUsers    CompanyUser[]
-  subscriptions   Subscription[]
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id           String    @id @default(cuid())
+  name         String
+  email        String
+  phone        String
+  cnpj         String?   @unique
+  description  String?
+  slug         String    @unique
+  themeConfig  Json?
+  webhookUrl   String?
+  isActive     Boolean   @default(true)
+  contractDate DateTime?
+
+  address       Address?
+  users         CompanyUser[]
+  plans         Plan[]
+  customers     Customer[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  webhookEvents WebhookEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("companies")
 }
 
 model CompanyUser {
-  id              String          @id @default(cuid())
-  role            CompanyRole     @default(USER)
-  
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId          String
-  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  companyId       String
-  
-  @@unique([userId, companyId])
+  id        String   @id @default(cuid())
+  email     String
+  cpf       String
+  name      String
+  password  String
+  isActive  Boolean  @default(true)
+  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, companyId])
+  @@unique([cpf, companyId])
   @@map("company_users")
 }
 
 model Address {
-  id              String          @id @default(cuid())
-  street          String
-  number          String
-  neighborhood    String
-  city            String
-  state           String
-  zipCode         String          @map("zip_code")
-  complement      String?
-  
-  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  companyId       String          @unique
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id           String   @id @default(cuid())
+  street       String
+  number       String
+  neighborhood String
+  city         String
+  state        String
+  zipCode      String   @map("zip_code")
+  complement   String?
+  company      Company  @relation(fields: [companyId], references: [id])
+  companyId    String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("addresses")
 }
 
+model Customer {
+  id         String  @id @default(cuid())
+  email      String
+  name       String
+  cpf        String?
+  phone      String?
+  externalId String?
+  metadata   Json?
+
+  company       Company        @relation(fields: [companyId], references: [id])
+  companyId     String
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, companyId])
+  @@map("customers")
+}
+
 model Subscription {
-  id                      String              @id @default(cuid())
-  status                  SubscriptionStatus  @default(PENDING)
-  currentPeriodStart      DateTime?
-  currentPeriodEnd        DateTime?
-  cancelAtPeriodEnd       Boolean             @default(false)
-  stripeSubscriptionId    String?             @unique
-  stripeCustomerId        String?             @unique
-  stripePriceId           String?
-  
-  company                 Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  companyId               String
-  plan                    Plan                @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId                  String
-  invoices                Invoice[]
-  
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
+  id                   String             @id @default(cuid())
+  status               SubscriptionStatus @default(PENDING)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  stripeSubscriptionId String?            @unique
+  stripeCustomerId     String?            @unique
+  stripePriceId        String?
+
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
+  plan       Plan     @relation(fields: [planId], references: [id])
+  planId     String
+  company    Company  @relation(fields: [companyId], references: [id])
+  companyId  String
+
+  invoices  Invoice[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("subscriptions")
 }
 
 model Plan {
-  id              String          @id @default(cuid())
+  id              String       @id @default(cuid())
   name            String
   description     String?
-  price           Int            
-  currency        String          @default("BRL")
-  interval        PlanInterval    @default(MONTHLY)
-  active          Boolean         @default(true)
-  stripePriceId   String?         @unique
+  price           Int
+  currency        String       @default("BRL")
+  interval        PlanInterval @default(MONTHLY)
+  features        Json?
+  active          Boolean      @default(true)
+  stripePriceId   String?      @unique
   stripeProductId String?
-  
-  subscriptions   Subscription[]
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id])
+  companyId     String
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("plans")
 }
 
 model Invoice {
-  id              String          @id @default(cuid())
-  amount          Int
-  currency        String          @default("BRL")
-  status          InvoiceStatus   @default(DRAFT)
-  dueDate         DateTime?
-  paidAt          DateTime?
-  stripeInvoiceId String?         @unique
+  id                    String        @id @default(cuid())
+  amount                Int
+  currency              String        @default("BRL")
+  status                InvoiceStatus @default(DRAFT)
+  dueDate               DateTime?
+  paidAt                DateTime?
+  stripeInvoiceId       String?       @unique
   stripePaymentIntentId String?
-  
-  subscription    Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  subscriptionId  String
-  
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  subscription          Subscription  @relation(fields: [subscriptionId], references: [id])
+  subscriptionId        String
+  company               Company       @relation(fields: [companyId], references: [id])
+  companyId             String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("invoices")
 }
 
 model WebhookEvent {
-  id              String          @id @default(cuid())
+  id              String   @id @default(cuid())
   type            String
   payload         Json
-  processed       Boolean         @default(false)
+  processed       Boolean  @default(false)
   processingError String?
-  createdAt       DateTime        @default(now())
+  company         Company? @relation(fields: [companyId], references: [id])
+  companyId       String?
+  createdAt       DateTime @default(now())
 
   @@map("webhook_events")
 }
 
-enum GlobalRole {
+enum AdminRole {
   SUPER_ADMIN
-  USER
-}
-
-enum CompanyRole {
-  ADMIN
-  USER
+  SUPPORT
 }
 
 enum SubscriptionStatus {
@@ -159,11 +190,15 @@ enum SubscriptionStatus {
   EXPIRED
   PAYMENT_FAILED
   PAST_DUE
+  TRIALING
 }
 
 enum PlanInterval {
+  DAILY
+  WEEKLY
   MONTHLY
-  HALF_YEARLY
+  QUARTERLY
+  BIANNUAL
   YEARLY
 }
 
