@@ -10,7 +10,7 @@ export class PrismaUsersRepository implements UsersRepository {
 
   async findByEmailOrCpf(emailOrCpf: string): Promise<any | null> {
     // Aqui eu vou buscar o usuário pelo email ou cpf
-    return this.prisma.user.findFirst({
+    return this.prisma.companyUser.findFirst({
       where: {
         OR: [{ email: emailOrCpf }, { cpf: emailOrCpf }],
       },
@@ -18,18 +18,9 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async createUserWithCompanyAndAddress(data: RegisterDto): Promise<any> {
-    // Aqui eu crio usuário, empresa, endereço e relação entre eles em uma única transação
-    const result = await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          name: data.user.name,
-          email: data.user.email,
-          cpf: data.user.cpf,
-          // TODO: aqui eu ainda vou fazer hash da senha antes de salvar
-          password: data.user.password,
-        },
-      });
+    const slug = this.generateSlug(data.business.name);
 
+    const result = await this.prisma.$transaction(async (tx) => {
       const company = await tx.company.create({
         data: {
           name: data.business.name,
@@ -37,6 +28,7 @@ export class PrismaUsersRepository implements UsersRepository {
           phone: data.business.phone,
           cnpj: data.business.cpfOrCnpj,
           description: data.business.description,
+          slug: slug,
         },
       });
 
@@ -55,15 +47,29 @@ export class PrismaUsersRepository implements UsersRepository {
 
       const companyUser = await tx.companyUser.create({
         data: {
-          userId: user.id,
+          name: data.user.name,
+          email: data.user.email,
+          cpf: data.user.cpf,
+          password: data.user.password,
           companyId: company.id,
-          role: 'ADMIN',
         },
       });
 
-      return { user, company, address, companyUser };
+      return { companyUser, company, address };
     });
 
     return result;
+  }
+
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '')
+      .substring(0, 50) + 
+      '-' + 
+      Date.now().toString().slice(-6);
   }
 }
