@@ -1,3 +1,5 @@
+import { SeedCommandModule } from './seed/seed-command.module';
+import { SeedModule } from './seed/seed.module';
 import { PrismaModule } from './module/prisma/prisma.module';
 import { PrismaService } from './module/prisma/prisma.service';
 import { Module } from '@nestjs/common';
@@ -10,6 +12,8 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
+    SeedCommandModule,
+    SeedModule,
     PrismaModule,
     AuthModule,
     UsersModule,
