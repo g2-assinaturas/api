@@ -1,3 +1,4 @@
+import { SuperAdminModule } from './super-admin/super-admin.module';
 import { SeedCommandModule } from './seed/seed-command.module';
 import { SeedModule } from './seed/seed.module';
 import { PrismaModule } from './module/prisma/prisma.module';
@@ -12,6 +13,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
+    SuperAdminModule,
     SeedCommandModule,
     SeedModule,
     PrismaModule,
