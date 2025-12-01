@@ -3,6 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/module/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
 import { RegisterDto } from '../../auth/dto/register.dto';
+<<<<<<< HEAD
+=======
+import { Prisma } from 'generated/prisma';
+>>>>>>> 6334514 (Resolvidos conflitos)
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
