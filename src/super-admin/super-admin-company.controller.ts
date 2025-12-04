@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
   Controller,
   Delete,
   Get,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   Put,
@@ -38,7 +38,15 @@ export class SuperAdminCompanyController {
     return {
       success: true,
       message: result.message,
-      data: result,
+      data: {
+        company: result.company,
+        address: result.address,
+        initialUser: {
+          email: result.companyUser.email,
+          temporaryPassword: result.companyUser.temporaryPassword,
+          note: 'Esta senha é temporária e deve ser alterada no primeiro acesso',
+        },
+      },
     };
   }
 
@@ -72,7 +80,7 @@ export class SuperAdminCompanyController {
       success: true,
       data: companies,
       meta: {
-        total: (await companies).length,
+        total: companies.length,
         timestamp: new Date().toISOString(),
       },
     };
@@ -118,14 +126,14 @@ export class SuperAdminCompanyController {
       `Super Admin ${superAdmin.name} deletando empresa permanentemente (hard delete): ${id}`,
     );
 
-    const result = await this.superAdminCompanyService.deleteCompany(id)
+    const result = await this.superAdminCompanyService.deleteCompany(id);
 
     return {
       success: true,
       message: result.message,
       data: {
-        note: 'Todos os dados da empresa foram removidos.'
-      }
-    }
+        note: 'Todos os dados da empresa foram removidos.',
+      },
+    };
   }
 }
