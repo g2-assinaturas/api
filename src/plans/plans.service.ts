@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InMemoryPlansRepository } from './repositories/in-memory-plans.repository';
+import { PrismaPlansRepository } from './repositories/prisma-plans.repository';
 
 @Injectable()
 export class PlansService {
-  constructor(private readonly plansRepository: InMemoryPlansRepository) {}
+  constructor(private readonly plansRepository: PrismaPlansRepository) {}
 
-  findAll() {
-    // Aqui eu só delego para o repositório em memória
+  async findAll() {
+
     return this.plansRepository.findAll();
   }
 }

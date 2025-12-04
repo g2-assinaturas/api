@@ -7,7 +7,8 @@ export type SubscriptionStatusDto =
   | 'CANCELED'
   | 'EXPIRED'
   | 'PAYMENT_FAILED'
-  | 'PAST_DUE';
+  | 'PAST_DUE'
+  | 'TRIALING';
 
 export class SubscriptionDto {
   id: string;

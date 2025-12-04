@@ -1,4 +1,3 @@
-// Implementação de UsersRepository usando Prisma (quando o banco estiver disponível)
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/module/prisma/prisma.service';
 import { UsersRepository } from './users.repository';
