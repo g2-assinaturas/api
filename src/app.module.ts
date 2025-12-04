@@ -1,3 +1,4 @@
+import { CompanyAuthModule } from './company-auth/company-auth.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
 import { SeedCommandModule } from './seed/seed-command.module';
 import { SeedModule } from './seed/seed.module';
@@ -13,6 +14,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
+    CompanyAuthModule,
     SuperAdminModule,
     SeedCommandModule,
     SeedModule,

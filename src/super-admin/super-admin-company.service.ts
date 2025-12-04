@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   ConflictException,
@@ -8,6 +9,7 @@ import {
 import { PrismaService } from 'src/module/prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SuperAdminCompanyService {
@@ -42,12 +44,44 @@ export class SuperAdminCompanyService {
         });
       }
 
+      const defaultPassword = this.generateTemporaryPassword();
+      const hashedPassword = await bcrypt.hash(defaultPassword, 12);
+
+      const companyUser = await tx.companyUser.create({
+        data: {
+          name: 'Administrador',
+          email: createCompanyDto.email,
+          cpf: '00000000000',
+          password: hashedPassword,
+          companyId: company.id,
+        },
+      });
+
       return {
         company,
         address,
+        companyUser: {
+          id: companyUser.id,
+          email: companyUser.email,
+          temporaryPassword: defaultPassword,
+        },
         message: 'Empresa criada com sucesso',
       };
     });
+  }
+
+  private generateTemporaryPassword(): string {
+    const length = 10;
+    const charset =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+
+    return password;
   }
 
   async updateCompany(id: string, updateCompanyDto: UpdateCompanyDto) {
@@ -105,7 +139,6 @@ export class SuperAdminCompanyService {
     await this.checkCompanyCriticalDependencies(id);
 
     return this.prisma.$transaction(async (tx) => {
-
       await tx.invoice.deleteMany({
         where: { companyId: id },
       });
