@@ -11,9 +11,11 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PlansModule } from './plans/plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { StripeModule } from './modules/stripe/stripe.module';
 
 @Module({
   imports: [
+    StripeModule,
     CompanyAuthModule,
     SuperAdminModule,
     SeedCommandModule,
@@ -23,7 +25,6 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     UsersModule,
     PlansModule,
     SubscriptionsModule,
-    PrismaModule,
   ],
   controllers: [AppController],
   providers: [PrismaService, AppService],
