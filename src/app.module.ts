@@ -12,10 +12,12 @@ import { UsersModule } from './users/users.module';
 import { PlansModule } from './plans/plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { StripeModule } from './modules/stripe/stripe.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
     StripeModule,
+    WebhooksModule,
     CompanyAuthModule,
     SuperAdminModule,
     SeedCommandModule,
