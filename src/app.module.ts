@@ -1,3 +1,4 @@
+import { CompanyPlansModule } from './company-plans/company-plans.module';
 import { CompanyAuthModule } from './company-auth/company-auth.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
 import { SeedCommandModule } from './seed/seed-command.module';
@@ -16,6 +17,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
+    CompanyPlansModule,
     StripeModule,
     WebhooksModule,
     CompanyAuthModule,
