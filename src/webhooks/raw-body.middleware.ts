@@ -5,7 +5,6 @@ import { Request, Response, NextFunction } from 'express';
 @Injectable()
 export class RawBodyMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-
     if (req.originalUrl === '/webhooks/stripe') {
       let data = '';
 

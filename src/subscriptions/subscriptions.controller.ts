@@ -25,7 +25,7 @@ export class SubscriptionsController {
     @Body() data: CheckoutSubscriptionDto,
   ) {
     // Cria uma assinatura real para o usuário de empresa logado
-    return this.subscriptionsService.checkout(user.id, data);
+    return this.subscriptionsService.createCheckoutSession(user.id, data);
   }
 
   @UseGuards(CompanyJwtGuard)
@@ -37,10 +37,7 @@ export class SubscriptionsController {
 
   @UseGuards(CompanyJwtGuard)
   @Post('cancel')
-  cancel(
-    @CurrentCompanyUser() user: any,
-    @Body() data: CancelSubscriptionDto,
-  ) {
+  cancel(@CurrentCompanyUser() user: any, @Body() data: CancelSubscriptionDto) {
     // Cancela (ou marca para cancelar no fim do período) a assinatura da empresa
     return this.subscriptionsService.cancel(user.id, data);
   }

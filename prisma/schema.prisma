@@ -122,6 +122,7 @@ model Subscription {
   stripeSubscriptionId String?            @unique
   stripeCustomerId     String?            @unique
   stripePriceId        String?
+  checkoutSessionId    String?            @unique
 
   customer   Customer @relation(fields: [customerId], references: [id])
   customerId String

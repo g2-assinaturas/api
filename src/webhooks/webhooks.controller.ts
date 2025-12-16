@@ -1,79 +1,88 @@
-import {
-  Controller,
-  Post,
-  Req,
-  Headers,
-  BadRequestException,
-  Logger,
-  HttpCode,
-} from '@nestjs/common';
-import type { Request } from 'express';
-import { WebhooksService } from './webhooks.service';
+import * as common from '@nestjs/common';
+import { Request } from 'express';
 import { StripeService } from '../modules/stripe/stripe.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
-@Controller('webhooks')
-export class WebhooksController {
-  private readonly logger = new Logger(WebhooksController.name);
+@common.Controller('webhooks/stripe')
+export class StripeWebhookController {
+  private readonly logger = new common.Logger(StripeWebhookController.name);
 
   constructor(
-    private readonly webhooksService: WebhooksService,
     private readonly stripeService: StripeService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
-  //Endpoint para receber webhooks do Stripe
-  //LEMBRAR: Este endpoint deve estar configurado no dashboard do Stripe
-        
-  @Post('stripe')
-  @HttpCode(200) 
-  async handleStripeWebhook(
-    @Req() request: Request,
-    @Headers('stripe-signature') signature: string,
-  ): Promise<{ received: boolean }> {
-    // Verifica se o Stripe está configurado
-    if (!this.stripeService.isConfigured()) {
-      this.logger.error(
-        'Webhook recebido mas Stripe não está configurado (STRIPE_SECRET_KEY ausente)',
-      );
-      throw new BadRequestException('Stripe não configurado');
-    }
-
-    // Verifica se a assinatura foi enviada
+  @common.Post()
+  async handleWebhook(
+    @common.Headers('stripe-signature') signature: string,
+    @common.Req() req: common.RawBodyRequest<Request>,
+  ) {
     if (!signature) {
-      this.logger.error('Webhook recebido sem assinatura do Stripe');
-      throw new BadRequestException('Assinatura do webhook ausente');
-    }
-
-    // Pega o body raw (necessário para validar a assinatura)
-    const payload = request['rawBody'] || (request.body as Buffer);
-
-    if (!payload) {
-      this.logger.error('Webhook recebido sem payload');
-      throw new BadRequestException('Payload ausente');
+      throw new common.HttpException(
+        'Assinatura Stripe não fornecida',
+        common.HttpStatus.BAD_REQUEST,
+      );
     }
 
     try {
-      //Valida a assinatura do webhook
-      const event = this.stripeService.constructWebhookEvent(payload, signature);
+      // AQUI ESTÁ A MUDANÇA: Usar o body raw para validação da assinatura
+      const rawBody = req.rawBody;
 
-      this.logger.log(
-        `Webhook validado: ${event.type} (${event.id}) - Processando...`,
+      if (!rawBody) {
+        throw new common.HttpException(
+          'Corpo da requisição vazio',
+          common.HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const event = this.stripeService.constructWebhookEvent(
+        rawBody,
+        signature,
       );
 
-      // Processa o evento de forma assíncrona
-      await this.webhooksService.processStripeEvent(event);
+      this.logger.log(`Webhook Stripe recebido: ${event.type}`);
+
+      // Processar o evento
+      await this.subscriptionsService.handleStripeWebhook(event);
 
       return { received: true };
     } catch (error) {
-      this.logger.error(
-        `Erro ao processar webhook do Stripe: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Erro ao processar webhook: ${error.message}`);
 
-      if (error.message?.includes('signature')) {
-        throw new BadRequestException('Assinatura inválida do webhook');
+      if (error.message.includes('Invalid signature')) {
+        throw new common.HttpException(
+          'Assinatura inválida',
+          common.HttpStatus.BAD_REQUEST,
+        );
       }
 
-      throw error;
+      throw new common.HttpException(
+        'Erro ao processar webhook',
+        common.HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
+  }
+
+  // AQUI ESTÁ A MUDANÇA: Endpoint para testar webhooks localmente
+  @common.Post('test')
+  async testWebhook(@common.Body() testEvent: any) {
+    this.logger.log(`Teste de webhook recebido: ${testEvent.type}`);
+
+    // Validar formato básico do evento de teste
+    if (!testEvent.type || !testEvent.data) {
+      throw new common.HttpException(
+        'Formato do evento de teste inválido',
+        common.HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Processar evento de teste
+    await this.subscriptionsService.handleStripeWebhook(testEvent);
+
+    return {
+      message: 'Evento de teste processado',
+      eventType: testEvent.type,
+      timestamp: new Date().toISOString(),
+    };
   }
 }

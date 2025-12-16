@@ -27,37 +27,27 @@ export class WebhooksService {
       // Processa o evento baseado no tipo
       switch (event.type) {
         case 'customer.subscription.created':
-          await this.handleSubscriptionCreated(
-            event.data.object as Stripe.Subscription,
-          );
+          await this.handleSubscriptionCreated(event.data.object);
           break;
 
         case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(
-            event.data.object as Stripe.Subscription,
-          );
+          await this.handleSubscriptionUpdated(event.data.object);
           break;
 
         case 'customer.subscription.deleted':
-          await this.handleSubscriptionDeleted(
-            event.data.object as Stripe.Subscription,
-          );
+          await this.handleSubscriptionDeleted(event.data.object);
           break;
 
         case 'invoice.paid':
-          await this.handleInvoicePaid(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaid(event.data.object);
           break;
 
         case 'invoice.payment_failed':
-          await this.handleInvoicePaymentFailed(
-            event.data.object as Stripe.Invoice,
-          );
+          await this.handleInvoicePaymentFailed(event.data.object);
           break;
 
         case 'invoice.payment_action_required':
-          await this.handleInvoicePaymentActionRequired(
-            event.data.object as Stripe.Invoice,
-          );
+          await this.handleInvoicePaymentActionRequired(event.data.object);
           break;
 
         default:
@@ -91,7 +81,7 @@ export class WebhooksService {
   }
 
   //Handler: Assinatura criada no Stripe
- 
+
   private async handleSubscriptionCreated(
     subscription: Stripe.Subscription,
   ): Promise<void> {
@@ -137,9 +127,7 @@ export class WebhooksService {
     });
 
     if (!existingSubscription) {
-      this.logger.warn(
-        `Assinatura ${subscription.id} não encontrada no banco`,
-      );
+      this.logger.warn(`Assinatura ${subscription.id} não encontrada no banco`);
       return;
     }
 
@@ -161,7 +149,7 @@ export class WebhooksService {
   }
 
   //Handler: Assinatura cancelada no Stripe
- 
+
   private async handleSubscriptionDeleted(
     subscription: Stripe.Subscription,
   ): Promise<void> {
@@ -172,9 +160,7 @@ export class WebhooksService {
     });
 
     if (!existingSubscription) {
-      this.logger.warn(
-        `Assinatura ${subscription.id} não encontrada no banco`,
-      );
+      this.logger.warn(`Assinatura ${subscription.id} não encontrada no banco`);
       return;
     }
 
@@ -211,9 +197,7 @@ export class WebhooksService {
     });
 
     if (!subscription) {
-      this.logger.warn(
-        `Assinatura ${subscriptionId} não encontrada no banco`,
-      );
+      this.logger.warn(`Assinatura ${subscriptionId} não encontrada no banco`);
       return;
     }
 
@@ -270,7 +254,7 @@ export class WebhooksService {
   }
 
   //Handler: Falha no pagamento da fatura
- 
+
   private async handleInvoicePaymentFailed(
     invoice: Stripe.Invoice,
   ): Promise<void> {
@@ -293,9 +277,7 @@ export class WebhooksService {
     });
 
     if (!subscription) {
-      this.logger.warn(
-        `Assinatura ${subscriptionId} não encontrada no banco`,
-      );
+      this.logger.warn(`Assinatura ${subscriptionId} não encontrada no banco`);
       return;
     }
 
@@ -339,7 +321,7 @@ export class WebhooksService {
   }
 
   //Handler: Ação necessária para pagamento (ex: 3D Secure)
- 
+
   private async handleInvoicePaymentActionRequired(
     invoice: Stripe.Invoice,
   ): Promise<void> {
@@ -371,7 +353,7 @@ export class WebhooksService {
   }
 
   //Mapeia status do Stripe para o enum do banco
- 
+
   private mapStripeStatus(
     stripeStatus: Stripe.Subscription.Status,
   ): SubscriptionStatus {
