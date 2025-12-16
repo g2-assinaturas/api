@@ -1,13 +1,14 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { WebhooksController } from './webhooks.controller';
+import { StripeWebhookController } from './webhooks.controller';
 import { WebhooksService } from './webhooks.service';
 import { StripeModule } from '../modules/stripe/stripe.module';
 import { PrismaModule } from '../module/prisma/prisma.module';
 import { RawBodyMiddleware } from './raw-body.middleware';
+import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
 
 @Module({
-  imports: [StripeModule, PrismaModule],
-  controllers: [WebhooksController],
+  imports: [StripeModule, PrismaModule, SubscriptionsModule],
+  controllers: [StripeWebhookController],
   providers: [WebhooksService],
   exports: [WebhooksService],
 })

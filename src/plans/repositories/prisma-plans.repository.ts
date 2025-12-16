@@ -25,7 +25,7 @@ export class PrismaPlansRepository {
           interval = 'YEARLY';
           break;
         case 'BIANNUAL':
-          interval = 'HALF_YEARLY';
+          interval = 'BIANNUAL';
           break;
         default:
           // Ignora planos com intervalos não suportados pelo DTO por enquanto
