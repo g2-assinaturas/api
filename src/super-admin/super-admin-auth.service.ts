@@ -42,8 +42,8 @@ export class SuperAdminAuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
-      superAdmin: {
+      accessToken: this.jwtService.sign(payload),
+      user: {
         id: superAdmin.id,
         email: superAdmin.email,
         name: superAdmin.name,

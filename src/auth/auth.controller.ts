@@ -8,8 +8,18 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() data: RegisterDto) {
-    return this.authService.register(data);
+  async register(@Body() data: RegisterDto) {
+    try {
+      console.log('Register endpoint called with data:', {
+        business: data.business,
+        address: data.address,
+        user: { ...data.user, password: '[HIDDEN]' }
+      });
+      return await this.authService.register(data);
+    } catch (error) {
+      console.error('Error in register controller:', error);
+      throw error;
+    }
   }
 
   @Post('login')
