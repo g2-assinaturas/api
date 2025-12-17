@@ -12,30 +12,15 @@ export class AuthService {
   ) {}
 
   async register(data: RegisterDto) {
-    try {
-      console.log('AuthService.register called');
-      const result = await this.usersRepository.createUserWithCompanyAndAddress(
-        data,
-      );
+    // Aqui eu vou usar o repositório para simular a criação de usuário, empresa e endereço
+    const result = await this.usersRepository.createUserWithCompanyAndAddress(
+      data,
+    );
 
-      console.log('Registration successful, returning response');
-      return {
-        message: 'Empresa registrada com sucesso!',
-        companyUser: {
-          id: result.companyUser.id,
-          name: result.companyUser.name,
-          email: result.companyUser.email,
-        },
-        company: {
-          id: result.company.id,
-          name: result.company.name,
-          slug: result.company.slug,
-        },
-      };
-    } catch (error) {
-      console.error('Error in AuthService.register:', error);
-      throw error;
-    }
+    return {
+      message: 'Registro criado em memória (depois eu troco para Prisma/banco real)',
+      result,
+    };
   }
 
   async login(data: LoginDto) {

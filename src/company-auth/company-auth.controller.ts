@@ -28,7 +28,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompanyJwtGuard } from './guards/company-jwt.guard';
-import { CreateFirstUserDto } from './dto/create-first-user.dto';
 
 @ApiTags('Autenticação Empresas')
 @Controller('company-auth')
@@ -57,7 +56,7 @@ export class CompanyAuthController {
   @Post('first-user/:companyId')
   async createFirstUser(
     @Param('companyId', ParseUUIDPipe) companyId: string,
-    @Body() createUserDto: CreateFirstUserDto,
+    @Body() createUserDto: any,
   ) {
     const user = await this.companyAuthService.createFirstCompanyUser(
       companyId,
