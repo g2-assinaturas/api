@@ -26,13 +26,20 @@ export class CompanyAuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateCompanyUser(email: string, password: string): Promise<any> {
+  async validateCompanyUser(emailOrCpf: string, password: string) {
+    const cleanEmailOrCpf = emailOrCpf.trim();
+    console.log('Validating user with emailOrCpf:', cleanEmailOrCpf);
+
     const companyUser = await this.prisma.companyUser.findFirst({
-      where: { email },
+      where: {
+        OR: [{ email: cleanEmailOrCpf }, { cpf: cleanEmailOrCpf }],
+      },
       include: {
         company: true,
       },
     });
+
+    console.log('User found:', companyUser);
 
     if (!companyUser) {
       throw new UnauthorizedException('Credenciais inválidas');
@@ -54,6 +61,9 @@ export class CompanyAuthService {
       password,
       companyUser.password,
     );
+
+    console.log('Password valid:', isPasswordValid);
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
@@ -72,7 +82,7 @@ export class CompanyAuthService {
 
   async login(loginDto: LoginCompanyDto) {
     const companyUser = await this.validateCompanyUser(
-      loginDto.email,
+      loginDto.emailOrCpf,
       loginDto.password,
     );
 
@@ -85,8 +95,8 @@ export class CompanyAuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
-      companyUser: {
+      accessToken: this.jwtService.sign(payload),
+      user: {
         id: companyUser.id,
         email: companyUser.email,
         name: companyUser.name,
@@ -156,9 +166,10 @@ export class CompanyAuthService {
         name: createUserDto.name,
         email: createUserDto.email,
         cpf: createUserDto.cpf,
+        phone: createUserDto.phone || '00000000000',
         password: hashedPassword,
         companyId: companyId,
-      },
+      } as any, // Explicitly cast to bypass TypeScript error
     });
   }
 

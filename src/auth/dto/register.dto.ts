@@ -5,7 +5,9 @@ import {
   Length,
   Matches,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class RegisterBusinessData {
   @IsString()
@@ -81,12 +83,26 @@ export class RegisterUserData {
   cpf: string;
 
   @IsString()
+  @Matches(/^(\+\d{1,3})?\d{10,11}$/, {
+    message: 'Phone must be a valid phone number',
+  })
+  phone: string;
+
+  @IsString()
   @MinLength(6)
   password: string;
 }
 
 export class RegisterDto {
+  @ValidateNested()
+  @Type(() => RegisterBusinessData)
   business: RegisterBusinessData;
+
+  @ValidateNested()
+  @Type(() => RegisterAddressData)
   address: RegisterAddressData;
+
+  @ValidateNested()
+  @Type(() => RegisterUserData)
   user: RegisterUserData;
 }

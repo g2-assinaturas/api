@@ -49,6 +49,7 @@ model CompanyUser {
   id                  String               @id @default(cuid())
   email               String
   cpf                 String
+  phone               String
   name                String
   password            String
   isActive            Boolean              @default(true)
