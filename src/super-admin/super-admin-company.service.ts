@@ -52,7 +52,6 @@ export class SuperAdminCompanyService {
           name: 'Administrador',
           email: createCompanyDto.email,
           cpf: '00000000000',
-          phone: createCompanyDto.phone || '00000000000',
           password: hashedPassword,
           companyId: company.id,
         },

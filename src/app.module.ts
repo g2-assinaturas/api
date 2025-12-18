@@ -1,3 +1,4 @@
+import { StripeConnectModule } from './modules/stripe-connect/stripe-connect.module';
 import { CompanyPlansModule } from './company-plans/company-plans.module';
 import { CompanyAuthModule } from './company-auth/company-auth.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
@@ -17,6 +18,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
+    StripeConnectModule,
     CompanyPlansModule,
     StripeModule,
     WebhooksModule,
