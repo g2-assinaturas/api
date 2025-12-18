@@ -31,6 +31,9 @@ model Company {
   isActive     Boolean   @default(true)
   contractDate DateTime?
 
+  stripeAccountId     String? @unique
+  stripeAccountStatus String? @default("pending")
+
   address       Address?
   users         CompanyUser[]
   plans         Plan[]
