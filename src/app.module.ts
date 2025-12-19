@@ -33,6 +33,6 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     SubscriptionsModule,
   ],
   controllers: [AppController],
-  providers: [PrismaService, AppService],
+  providers: [AppService],
 })
 export class AppModule {}
