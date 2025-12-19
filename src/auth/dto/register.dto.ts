@@ -3,21 +3,29 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
   MinLength,
 } from 'class-validator';
 
 export class RegisterBusinessData {
   @IsString()
+  @MinLength(2)
   name: string;
 
   @IsEmail()
   email: string;
 
   @IsString()
+  @Matches(/^(\+\d{1,3})?\d{10,11}$/, {
+    message: 'Phone must be a valid phone number',
+  })
   phone: string;
 
   @IsOptional()
   @IsString()
+  @Matches(/^(\d{11}|\d{14})$|^$/, {
+    message: 'CPF/CNPJ must be 11 (CPF) or 14 (CNPJ) digits',
+  })
   cpfOrCnpj?: string;
 
   @IsOptional()
@@ -27,22 +35,27 @@ export class RegisterBusinessData {
 
 export class RegisterAddressData {
   @IsString()
+  @MinLength(2)
   street: string;
 
   @IsString()
   number: string;
 
   @IsString()
+  @MinLength(2)
   neighborhood: string;
 
   @IsString()
+  @MinLength(2)
   city: string;
 
   @IsString()
+  @Length(2, 2)
   state: string;
 
   @IsString()
   @Length(8, 8)
+  @Matches(/^\d{8}$/, { message: 'Zip code must be 8 digits' })
   zipCode: string;
 
   @IsOptional()
@@ -56,6 +69,7 @@ export class RegisterAddressData {
 
 export class RegisterUserData {
   @IsString()
+  @MinLength(2)
   name: string;
 
   @IsEmail()
@@ -63,6 +77,7 @@ export class RegisterUserData {
 
   @IsString()
   @Length(11, 11)
+  @Matches(/^\d{11}$/, { message: 'CPF must be exactly 11 digits' })
   cpf: string;
 
   @IsString()

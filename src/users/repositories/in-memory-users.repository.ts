@@ -3,50 +3,85 @@ import { UsersRepository } from './users.repository';
 import { RegisterDto } from '../../auth/dto/register.dto';
 import { Injectable } from '@nestjs/common';
 
-let usersStore: any[] = [];
+let companiesStore: any[] = [];
+let companyUsersStore: any[] = [];
+let addressesStore: any[] = [];
 
 @Injectable()
 export class InMemoryUsersRepository extends UsersRepository {
   async findByEmailOrCpf(emailOrCpf: string): Promise<any | null> {
-    // Aqui eu vou buscar pelo primeiro usuário que tenha email ou cpf igual ao valor informado
     return (
-      usersStore.find(
+      companyUsersStore.find(
         (u) => u.email === emailOrCpf || u.cpf === emailOrCpf,
       ) || null
     );
   }
 
   async createUserWithCompanyAndAddress(data: RegisterDto): Promise<any> {
-    // Aqui eu simulo a criação de usuário, empresa e endereço em memória
-    const user = {
-      id: `user_${usersStore.length + 1}`,
-      name: data.user.name,
-      email: data.user.email,
-      cpf: data.user.cpf,
-    };
-
-    usersStore.push(user);
+    const slug = this.generateSlug(data.business.name);
 
     const company = {
-      id: `company_${usersStore.length}`,
+      id: `company_${companiesStore.length + 1}`,
       name: data.business.name,
       email: data.business.email,
       phone: data.business.phone,
+      cnpj: data.business.cpfOrCnpj,
+      description: data.business.description,
+      slug: slug,
+      isActive: true,
+      contractDate: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
+    companiesStore.push(company);
+
     const address = {
+      id: `address_${addressesStore.length + 1}`,
       street: data.address.street,
       number: data.address.number,
       neighborhood: data.address.neighborhood,
       city: data.address.city,
       state: data.address.state,
       zipCode: data.address.zipCode,
+      complement: data.address.complement,
+      companyId: company.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
+    addressesStore.push(address);
+
+    const companyUser = {
+      id: `company_user_${companyUsersStore.length + 1}`,
+      name: data.user.name,
+      email: data.user.email,
+      cpf: data.user.cpf,
+      password: data.user.password,
+      companyId: company.id,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    companyUsersStore.push(companyUser);
+
     return {
-      user,
+      companyUser,
       company,
       address,
     };
+  }
+
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '')
+      .substring(0, 50) + 
+      '-' + 
+      Date.now().toString().slice(-6);
   }
 }

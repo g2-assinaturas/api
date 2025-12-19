@@ -5,8 +5,7 @@ import { PrismaPlansRepository } from './repositories/prisma-plans.repository';
 export class PlansService {
   constructor(private readonly plansRepository: PrismaPlansRepository) {}
 
-  findAll() {
-    // Aqui eu só delego para o repositório de planos baseado em Prisma
+  async findAll() {
     return this.plansRepository.findAll();
   }
 }

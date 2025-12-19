@@ -1,10 +1,18 @@
-// DTO que representa o que eu vou expor de um plano para o frontend
+export type PlanIntervalDto =
+  | 'DAILY'
+  | 'WEEKLY'
+  | 'MONTHLY'
+  | 'QUARTERLY'
+  | 'BIANNUAL'
+  | 'YEARLY';
+
 export class PlanDto {
   id: string;
   name: string;
   description?: string;
   price: number;
   currency: string;
-  interval: 'MONTHLY' | 'HALF_YEARLY' | 'YEARLY';
+  interval: PlanIntervalDto;
   active: boolean;
+  companyName?: string;
 }

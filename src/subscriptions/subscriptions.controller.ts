@@ -4,51 +4,48 @@ import {
   CancelSubscriptionDto,
   CheckoutSubscriptionDto,
 } from './dto/subscription.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CompanyJwtGuard } from '../company-auth/guards/company-jwt.guard';
+import { CurrentCompanyUser } from '../company-auth/decorators/current-company-user.decorator';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(CompanyJwtGuard)
   @Get('plans')
   listPlans() {
     // Endpoint que o frontend vai usar para listar planos de assinatura
     return this.subscriptionsService.listPlans();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(CompanyJwtGuard)
   @Post('checkout')
   checkout(
-    @CurrentUser() user: any,
+    @CurrentCompanyUser() user: any,
     @Body() data: CheckoutSubscriptionDto,
   ) {
-    // Aqui eu crio uma assinatura em memória para o usuário logado
-    return this.subscriptionsService.checkout(user.userId, data);
+    // Cria uma assinatura real para o usuário de empresa logado
+    return this.subscriptionsService.createCheckoutSession(user.id, data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(CompanyJwtGuard)
   @Get('current')
-  getCurrent(@CurrentUser() user: any) {
-    // Aqui eu busco a assinatura atual do usuário logado
-    return this.subscriptionsService.getCurrent(user.userId);
+  getCurrent(@CurrentCompanyUser() user: any) {
+    // Busca a assinatura atual da empresa do usuário logado
+    return this.subscriptionsService.getCurrent(user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(CompanyJwtGuard)
   @Post('cancel')
-  cancel(
-    @CurrentUser() user: any,
-    @Body() data: CancelSubscriptionDto,
-  ) {
-    // Aqui eu cancelo (ou marco para cancelar no fim do período) a assinatura do usuário
-    return this.subscriptionsService.cancel(user.userId, data);
+  cancel(@CurrentCompanyUser() user: any, @Body() data: CancelSubscriptionDto) {
+    // Cancela (ou marca para cancelar no fim do período) a assinatura da empresa
+    return this.subscriptionsService.cancel(user.id, data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(CompanyJwtGuard)
   @Get('invoices')
-  listInvoices(@CurrentUser() user: any) {
-    // Aqui eu retorno as faturas ligadas à assinatura (modo demo)
-    return this.subscriptionsService.listInvoices(user.userId);
+  listInvoices(@CurrentCompanyUser() user: any) {
+    // Retorna as faturas ligadas à empresa do usuário logado
+    return this.subscriptionsService.listInvoices(user.id);
   }
 }
